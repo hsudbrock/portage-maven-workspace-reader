@@ -59,6 +59,7 @@ public class PortageWorkspaceReader implements WorkspaceReader {
 		return new ArrayList<>();
 	}
 	
+	// TOOD: Support classifier?
 	private Path getArtifactLocatorPath(Artifact artifact) {
 		return ARTIFACT_REGISTRY_DIRECTORY
 				.resolve(artifact.getGroupId())
