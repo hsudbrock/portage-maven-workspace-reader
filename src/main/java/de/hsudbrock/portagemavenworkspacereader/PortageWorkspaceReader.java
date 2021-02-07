@@ -35,13 +35,13 @@ public class PortageWorkspaceReader implements WorkspaceReader {
 	@Override
 	public File findArtifact(Artifact artifact) {
 		System.out.println("Trying to find artifact: " + artifact);
-		Path artifactLocatorPath = getArtifactLocatorPath(artifact);
-		if (Files.exists(artifactLocatorPath)) {
+		Path artifactLocatorFile = getArtifactLocatorFile(artifact);
+		if (artifactLocatorFile != null) {
 			String artifactLocation;
 			try {
-				artifactLocation = Files.readAllLines(artifactLocatorPath).get(0);
+				artifactLocation = Files.readAllLines(artifactLocatorFile).get(0);
 			} catch (IOException e) {
-				System.out.println("Could not read artifact locator file at: " + artifactLocatorPath);	
+				System.out.println("Could not read artifact locator file at: " + artifactLocatorFile);	
 				return null;
 			}
 			System.out.println("Found artifact location for " + artifact + " at " + artifactLocation);
@@ -60,11 +60,26 @@ public class PortageWorkspaceReader implements WorkspaceReader {
 	}
 	
 	// TOOD: Support classifier?
-	private Path getArtifactLocatorPath(Artifact artifact) {
-		return ARTIFACT_REGISTRY_DIRECTORY
+	private Path getArtifactLocatorFile(Artifact artifact) {
+		Path fromSourcePath = ARTIFACT_REGISTRY_DIRECTORY
+				.resolve("source")
 				.resolve(artifact.getGroupId())
 				.resolve(artifact.getArtifactId())
 				.resolve(artifact.getVersion() + "-" + artifact.getExtension() + ".location");
+		if (Files.exists(fromSourcePath)) {
+			return fromSourcePath;
+		}
+		
+		Path binaryPath = ARTIFACT_REGISTRY_DIRECTORY
+				.resolve("binary")
+				.resolve(artifact.getGroupId())
+				.resolve(artifact.getArtifactId())
+				.resolve(artifact.getVersion() + "-" + artifact.getExtension() + ".location");
+		if (Files.exists(binaryPath)) {
+			return binaryPath;
+		}
+		
+		return null;
 	}
 
 }
